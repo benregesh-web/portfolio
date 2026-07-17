@@ -12,13 +12,37 @@
     .projet{background:white;padding:20px;margin:20px 0;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
     .projet a{color:#1e90ff;font-weight:bold}
     footer{text-align:center;padding:20px;background:#333;color:white}
+  
+  
+.bloc-presentation{
+  display: flex;
+  align-items: center;
+  gap:20px;
+  background-color: bleu;
+  padding: 20px
+  border-radius:8px;
+  margin: 20px 0;
+}
+.bloc-presentation img{
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%
+  
   </style>
 </head>
 <body>
 
 <header>
   <h1>Benregesh</h1>
-  <p>Développeur Web | Création de Sites Vitrines</p>
+  <div class="bloc-presentation">
+    <div>
+       <p>Développeur Web, Création de Sites Vitrines</p>
+    </div>
+    <img src="jean.jpg" alt="Ma photo">
+  </div>
+  
+  
   <a href="https://wa.me/2250710066132" class="btn">Me contacter sur WhatsApp</a>
 </header>
 
