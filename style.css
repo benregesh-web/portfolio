@@ -1,11 +1,73 @@
-<style>
-    body{font-family:Arial;margin:0;background:#f4f4f4;color:#333}
-    header{background:#1e90ff;color:white;padding:40px;text-align:center}
-    header h1{margin:0}
-    .btn{background:white;color:#1e90ff;padding:12px 25px;border-radius:5px;text-decoration:none;font-weight:bold}
-    section{padding:40px;max-width:900px;margin:auto}
-    .projet{background:white;padding:20px;margin:20px 0;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-    .projet a{color:#1e90ff;font-weight:bold}
-    footer{text-align:center;padding:20px;background:#333;color:white}
-  </style>
 
+body{
+  font-family:Arial;
+  margin:0;
+  background:#f4f4f4;
+  color:#333
+}
+
+header{
+  background:#1e90ff;
+  color:white;
+  padding:40px;
+  text-align:center
+}
+
+header h1{
+  margin:0;
+}
+    
+.btn{
+  background:white;
+  color:#1e90ff;
+  padding:12px 25px;
+  border-radius:5px;
+  text-decoration:none;
+  font-weight:bold
+}
+
+section{
+  padding:40px;
+  max-width:900px;
+  margin:auto;
+}
+
+.projet{
+  background:white;
+  padding:20px;
+  margin:20px 0;
+  border-radius:10px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+.projet a{
+  color:#1e90ff;
+  font-weight:bold;
+}
+
+footer{
+  text-align:center;
+  padding:20px;
+  background:#333;
+  color:white;
+}
+
+/* TAILLE DES IMAGES DES PROJETS */
+.projet img, 
+.card img { /* si tu utilises .card */
+  width: 100%;
+  height: 180px; /* Hauteur fixe pour que toutes soient pareilles */
+  object-fit: cover; /* Coupe l'image pour qu'elle rentre bien */
+  border-radius: 8px;
+  display: block;
+}
+
+/* POUR QUE LES CARTES SOIENT BIEN ALIGNÉES */
+.projet, 
+.card {
+  width: 300px;
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin: 10px;
+}
