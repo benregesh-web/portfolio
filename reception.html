@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panel Réception SANA - VRAI STOCK + DEBLOQUER</title>
+<style>body{font-family:Arial;padding:15px;background:#f0f2f5;margin:0}.header{background:#111;color:white;padding:15px;text-align:center}.card{background:white;padding:15px;border-radius:12px;margin-bottom:12px;border-left:5px solid #25D366;box-shadow:0 2px 5px rgba(0,0,0,.1)}.btn-oui{background:#25D366;color:white;padding:14px;border:none;border-radius:8px;width:48%;font-weight:bold;cursor:pointer}.btn-non{background:#ff4444;color:white;padding:14px;border:none;border-radius:8px;width:48%;font-weight:bold;cursor:pointer}.stock-box{background:white;padding:12px;border-radius:8px;margin:10px 0}.btn-stock{padding:8px;margin:3px;background:#2E8B57;color:white;border:none;border-radius:5px;cursor:pointer;font-size:12px}</style>
+</head>
+<body>
+<script>if(prompt("🔐 Mot de passe Réception SANA:")!=="SANA2024"){alert("Faux");location.href="index.html"}</script>
+<div class="header"><h2 style="margin:0">🔴 PANEL RÉCEPTION SANA -  STOCK 64 CHS + 4 APPTS</h2><small>Temps réel - 50%/100% - Stock</small></div>
+<div style="padding:15px">
+<div class="stock-box">📦 Stock réel Firebase:<br>
+<b id="stock-view" style="font-size:14px">Chargement...</b><br>
+<small>Si 0 → catégorie bloquée automatiquement</small><br><br>
+
+<b>🔧 Débloquer / Remettre à zéro (quand chambre libre):</b><br>
+<button onclick="remettreStock('STANDARD 15.000F',12)" class="btn-stock">Standard 15k → 12</button>
+<button onclick="remettreStock('CLASSIQUE 20.000F',24)" class="btn-stock">Classique 20k → 24</button>
+<button onclick="remettreStock('CONFORT 30.000F',12)" class="btn-stock">Confort 30k → 12</button>
+<button onclick="remettreStock('VIP 50.000F',6)" class="btn-stock">VIP 50k → 6</button>
+<button onclick="remettreStock('VVIP 60.000F',2)" class="btn-stock">VVIP 60k → 2</button>
+<button onclick="remettreStock('SUITE 60.000F',4)" class="btn-stock">Suite 60k → 4</button>
+<button onclick="remettreStock('APPARTEMENT 70.000F',4)" class="btn-stock">Appart 70k → 4</button>
+<br><br>
+<button onclick="remettreTout()" style="padding:12px;background:orange;color:white;border:none;border-radius:8px;width:100%;font-weight:bold;cursor:pointer">🔄 REMETTRE TOUTES À ZÉRO (12/24/12/6/2/4/4)</button>
+<button onclick="ajouterUneChambre()" style="padding:10px;background:#111;color:white;border:none;border-radius:8px;width:100%;margin-top:8px;cursor:pointer">➕ +1 CHAMBRE LIBRE (client parti)</button>
+<button onclick="viderUneChambre()" style="padding:10px;background:#555;color:white;border:none;border-radius:8px;width:100%;margin-top:8px;cursor:pointer">➖ -1 CHAMBRE (manuellement)</button>
+</div>
+<div id="liste">Chargement des réservations...</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, onValue, remove, get, set } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyD0_1oZblysKviAaknavtTZCoM68J9_GKY",
+  authDomain: "sana-hotel-internationnal-odie.firebaseapp.com",
+  databaseURL: "https://sana-hotel-internationnal-odie-default-rtdb.firebaseio.com",
+  projectId: "sana-hotel-internationnal-odie",
+  storageBucket: "sana-hotel-internationnal-odie.firebasestorage.app",
+  messagingSenderId: "10660407067",
+  appId: "1:10660407067:web:7e20b4ab80f4db542a55be"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const STOCK_INIT={
+"STANDARD 15.000F":12,
+"CLASSIQUE 20.000F":24,
+"CONFORT 30.000F":12,
+"VIP 50.000F":6,
+"VVIP 60.000F":2,
+"SUITE 60.000F":4,
+"APPARTEMENT 70.000F":4
+};
+
+function getCategorieFromChambre(chambreStr){
+  if(chambreStr.includes("STANDARD")) return "STANDARD 15.000F";
+  if(chambreStr.includes("CLASSIQUE")) return "CLASSIQUE 20.000F";
+  if(chambreStr.includes("CONFORT")) return "CONFORT 30.000F";
+  if(chambreStr.includes("VVIP")) return "VVIP 60.000F";
+  if(chambreStr.includes("SUITE")) return "SUITE 60.000F";
+  if(chambreStr.includes("APPARTEMENT")) return "APPARTEMENT 70.000F";
+  if(chambreStr.includes("VIP")) return "VIP 50.000F";
+  return chambreStr;
+}
+
+onValue(ref(db,'stock'),(snap)=>{
+  if(!snap.exists()){
+    set(ref(db,'stock'), STOCK_INIT);
+    document.getElementById('stock-view').innerText = "Stock créé: STANDARD 12 | CLASSIQUE 24 | CONFORT 12 | VIP 6 | VVIP 2 | SUITE 4 | APPART 4";
+    return;
+  }
+  let s=snap.val(); let txt="";
+  for(let k in s){ txt+=`${k}: ${s[k]} | `; }
+  document.getElementById('stock-view').innerText=txt;
+});
+
+onValue(ref(db,'reservations'),(snap)=>{
+  let div=document.getElementById('liste'); div.innerHTML="";
+  if(!snap.exists()){div.innerHTML="<div class='card'>✅ Aucune réservation en attente</div>";return;}
+  snap.forEach(c=>{
+    let r=c.val(); let k=c.key;
+    let catStock = getCategorieFromChambre(r.cat || "");
+    div.innerHTML+=`<div class="card">
+<span style="background:${r.pourcentage==50?'orange':'green'};color:white;padding:4px 8px;border-radius:5px;font-size:12px">${r.statut}</span> <small>${r.date}</small><br>
+<b style="font-size:18px">${r.nom}</b> - ${r.tel}<br>
+🏨 Chambre: <b>${r.cat}</b> (${r.nuits} nuit(s)) → Stock: ${catStock}<br>
+💰 Total: ${r.total} FCFA<br>
+💳 Payé Wave: ${r.montant} FCFA (${r.pourcentage}% de ${catStock})<br>
+${r.pourcentage==50?`<span style="color:red;font-weight:bold">RESTE: ${r.reste} FCFA - 50% NON REMBOURSABLE</span>`:`<span style="color:green;font-weight:bold">PAYÉ 100% - Rien à demander</span>`}<br>
+📅 ${r.dates}<br>
+🌊 ID Wave: <b style="color:green">${r.waveId}</b><br>
+🔑 Code: ${r.codeCache} | 🆔 ${r.id}<br><br>
+<button onclick="confirmer('${k}','${r.cat}')" class="btn-oui">✅ J'AI REÇU ${r.montant} FCFA</button>
+<button onclick="refuser('${k}')" class="btn-non">❌ REFUSER</button>
+</div>`;
+  });
+});
+
+window.confirmer=async(k,catStr)=>{
+  let catStock = getCategorieFromChambre(catStr);
+  if(!confirm("Confirmer réception Wave pour "+catStr+"?\nCatégorie "+catStock+" va -1 pour tous les clients. Si 0, bloqué.")) return;
+  let snapStock=await get(ref(db,'stock'));
+  let st=snapStock.exists()?snapStock.val():STOCK_INIT;
+  if(!st[catStock]) st[catStock]=STOCK_INIT[catStock]||1;
+  if(st[catStock]<=0){ alert("Stock déjà à 0 pour "+catStock); await remove(ref(db,'reservations/'+k)); return; }
+  st[catStock]--;
+  await set(ref(db,'stock'),st);
+  await remove(ref(db,'reservations/'+k));
+  alert("✅ Confirmé! Reste "+catStock+": "+st[catStock]);
+}
+window.refuser=async(k)=>{ if(confirm("Refuser?")) await remove(ref(db,'reservations/'+k)); }
+
+// === NOUVEAUX BOUTONS DÉBLOQUER ===
+window.remettreStock=async(cat, qte)=>{
+  if(!confirm(`Remettre ${cat} à ${qte} chambres libres? Ça va débloquer pour les clients`)) return;
+  let snap=await get(ref(db,'stock'));
+  let st=snap.exists()?snap.val():STOCK_INIT;
+  st[cat]=qte;
+  await set(ref(db,'stock'), st);
+  alert(`✅ ${cat} remis à ${qte} - Débloqué`);
+}
+
+window.remettreTout=async()=>{
+  if(!confirm("Remettre TOUTES les chambres à plein? STANDARD 12, CLASSIQUE 24, CONFORT 12, VIP 6, VVIP 2, SUITE 4, APPART 4?")) return;
+  await set(ref(db,'stock'), STOCK_INIT);
+  alert("✅ Tout remis à zéro plein");
+}
+
+window.ajouterUneChambre=async()=>{
+  let cat = prompt("Quelle catégorie est redevenue libre?\nTape exactement:\nSTANDARD 15.000F\nCLASSIQUE 20.000F\nCONFORT 30.000F\nVIP 50.000F\nVVIP 60.000F\nSUITE 60.000F\nAPPARTEMENT 70.000F");
+  if(!cat ||!STOCK_INIT[cat]) return alert("Nom faux, recopie exactement");
+  let snap=await get(ref(db,'stock'));
+  let st=snap.exists()?snap.val():STOCK_INIT;
+  st[cat]=(st[cat]||0)+1;
+  if(st[cat] > STOCK_INIT[cat]) st[cat]=STOCK_INIT[cat];
+  await set(ref(db,'stock'), st);
+  alert(`✅ ${cat} maintenant: ${st[cat]} libres`);
+}
+
+window.viderUneChambre=async()=>{
+  let cat = prompt("Quelle catégorie veux-tu bloquer -1 manuellement?\nSTANDARD 15.000F etc");
+  if(!cat ||!STOCK_INIT[cat]) return alert("Nom faux");
+  let snap=await get(ref(db,'stock'));
+  let st=snap.exists()?snap.val():STOCK_INIT;
+  st[cat]=(st[cat]||0)-1;
+  if(st[cat] < 0) st[cat]=0;
+  await set(ref(db,'stock'), st);
+  alert(`✅ ${cat} maintenant: ${st[cat]}`);
+}
+</script>
+</body>
+</html>
